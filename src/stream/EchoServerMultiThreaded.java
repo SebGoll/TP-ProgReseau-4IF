@@ -14,7 +14,7 @@ public class EchoServerMultiThreaded  {
 
     /**
      * main method
-     * @param EchoServer port
+     * @param args [0] : echoServer port
      *
      **/
     public static void main(String args[]){
@@ -31,6 +31,7 @@ public class EchoServerMultiThreaded  {
                 Socket clientSocket = listenSocket.accept();
                 System.out.println("Connexion from:" + clientSocket.getInetAddress());
                 ClientThread ct = new ClientThread(clientSocket);
+                System.out.println(clientSocket.getRemoteSocketAddress());
                 ct.start();
             }
         } catch (Exception e) {
