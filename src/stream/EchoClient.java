@@ -47,14 +47,13 @@ public class EchoClient {
         }
                              
         String line;
-        int numMessagesReceivedByServ = 0;
+
         while (true) {
         	line=stdIn.readLine();
         	if (line.equals(".")) break;
         	socOut.println(line);
         	System.out.println("echo: " + socIn.readLine());
-            numMessagesReceivedByServ =Integer.parseInt(socIn.readLine());
-            System.out.println("numMessagesReceived = "+numMessagesReceivedByServ);
+
         }
       socOut.close();
       socIn.close();

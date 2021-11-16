@@ -7,17 +7,21 @@
 
 package stream;
 
-import java.io.*;
-import java.net.*;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.net.SocketAddress;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 
-public class EchoServerMultiThreaded  {
+public class EchoServerMultiThreaded {
 
     /**
      * main method
-     * @param args [0] : echoServer port
      *
+     * @param args [0] : echoServer port
      **/
-    public static void main(String args[]){
+    public static void main(String args[]) {
         ServerSocket listenSocket;
 
         if (args.length != 1) {
@@ -26,13 +30,22 @@ public class EchoServerMultiThreaded  {
         }
         try {
             listenSocket = new ServerSocket(Integer.parseInt(args[0])); //port
+            MasterThread mt = new MasterThread();
+            mt.start();
+
             System.out.println("Server ready...");
             while (true) {
+                //Nouvelle connexion
                 Socket clientSocket = listenSocket.accept();
                 System.out.println("Connexion from:" + clientSocket.getInetAddress());
+                System.out.println("ID: " + clientSocket.getRemoteSocketAddress());
                 ClientThread ct = new ClientThread(clientSocket);
-                System.out.println(clientSocket.getRemoteSocketAddress());
+
+                mt.threadList.add(ct);
+                mt.threadTable.put(clientSocket.getRemoteSocketAddress(),ct.getId());
                 ct.start();
+
+
             }
         } catch (Exception e) {
             System.err.println("Error in EchoServer:" + e);
