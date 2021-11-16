@@ -7,26 +7,31 @@
 
 package stream;
 
+import Data.SharedData;
+
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.net.Socket;
+import java.util.AbstractMap;
 
 public class ClientThread
         extends Thread {
 
     private Socket clientSocket;
     public boolean messageSent;
+    public SharedData sd;
+    public String nom;
 
 
-    ClientThread(Socket s) {
+    ClientThread(Socket s, SharedData data) {
         this.clientSocket = s;
+        this.sd = data;
+        this.nom = null;
     }
 
     /**
      * receives a request from client then sends an echo to the client
-     *
-     * @param clientSocket the client socket
      **/
     public void run() {
         try {
@@ -34,24 +39,23 @@ public class ClientThread
             socIn = new BufferedReader(
                     new InputStreamReader(clientSocket.getInputStream()));
             PrintStream socOut = new PrintStream(clientSocket.getOutputStream());
+            socOut.println("Renseignez votre pseudonyme");
+            nom = socIn.readLine();
+            socOut.println("Bienvenue "+nom+" vous pouvez maintenant chatter avec vos amis !");
+
+
             while (true) {
-                String line = socIn.readLine();
-                messageSent = true;
-                socOut.println(line);
-                System.out.println("MessageState: "+messageSent);
+                if (socIn.ready()) {
+                    String line = socIn.readLine();
+                    messageSent = true;
+                    sd.messagesToSend.add(new AbstractMap.SimpleEntry<>(line, nom));
+                }
+                if (sd.messageSent.get(this.getId())) {
+                    socOut.println(sd.messagesToSend.get(0).getValue() + " : " + sd.messagesToSend.get(0).getKey());
+                    sd.messageSent.put(this.getId(), false);
+                    sd.counterRead--;
+                }
             }
-        } catch (Exception e) {
-            System.err.println("Error in EchoServer:" + e);
-        }
-    }
-
-    public void sendMessage(String message) {
-
-        try {
-
-            PrintStream socOut = new PrintStream(clientSocket.getOutputStream());
-            socOut.println(message);
-
         } catch (Exception e) {
             System.err.println("Error in EchoServer:" + e);
         }

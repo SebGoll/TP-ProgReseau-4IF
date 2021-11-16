@@ -49,10 +49,13 @@ public class EchoClient {
         String line;
 
         while (true) {
-        	line=stdIn.readLine();
-        	if (line.equals(".")) break;
-        	socOut.println(line);
-        	System.out.println("echo: " + socIn.readLine());
+            if (stdIn.ready()){
+                line=stdIn.readLine();
+                if (line.equals(".")) break;
+                socOut.println(line);            }
+            if (socIn.ready()){
+                System.out.println(socIn.readLine());
+            }
 
         }
       socOut.close();

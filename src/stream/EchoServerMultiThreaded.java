@@ -7,10 +7,10 @@
 
 package stream;
 
+import Data.SharedData;
+
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.net.SocketAddress;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -29,8 +29,11 @@ public class EchoServerMultiThreaded {
             System.exit(1);
         }
         try {
+            SharedData sd = new SharedData();
             listenSocket = new ServerSocket(Integer.parseInt(args[0])); //port
-            MasterThread mt = new MasterThread();
+
+
+            MasterThread mt = new MasterThread(sd);
             mt.start();
 
             System.out.println("Server ready...");
@@ -39,10 +42,11 @@ public class EchoServerMultiThreaded {
                 Socket clientSocket = listenSocket.accept();
                 System.out.println("Connexion from:" + clientSocket.getInetAddress());
                 System.out.println("ID: " + clientSocket.getRemoteSocketAddress());
-                ClientThread ct = new ClientThread(clientSocket);
+                ClientThread ct = new ClientThread(clientSocket,sd);
 
-                mt.threadList.add(ct);
-                mt.threadTable.put(clientSocket.getRemoteSocketAddress(),ct.getId());
+                sd.threadList.add(ct);
+                sd.threadTable.put(clientSocket.getRemoteSocketAddress(), ct.getId());
+                sd.messageSent.put(ct.getId(),false);
                 ct.start();
 
 

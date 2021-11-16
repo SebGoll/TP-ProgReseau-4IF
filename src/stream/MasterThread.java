@@ -1,50 +1,38 @@
 package stream;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.io.PrintStream;
-import java.net.SocketAddress;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
+import Data.SharedData;
 
 public class MasterThread extends Thread {
-    public List<ClientThread> threadList;
-    public HashMap<SocketAddress, Long> threadTable;
+    public SharedData sd;
 
-    public MasterThread() {
-        threadList = new LinkedList<>();
-        threadTable = new HashMap<>();
+    public MasterThread(SharedData data) {
+        this.sd = data;
     }
 
     public void run() {
-        while(true){
-
-            for(ClientThread clientThread:threadList){
-                if(clientThread.messageSent){
-                    clientThread.messageSent=false;
-                    for(ClientThread destination:threadList){
-                        System.out.println("Alllo from"+clientThread.getId());
-                        destination.sendMessage("Tmer");
+        while (true) {
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            for (ClientThread clientThread : sd.threadList) {
+                if (clientThread.messageSent) {
+                    clientThread.messageSent = false;
+                    sd.counterRead = sd.threadList.size()-1;
+                    for (ClientThread destination : sd.threadList) {
+                        if(destination.getId()==clientThread.getId())continue;
+                        sd.messageSent.put(destination.getId(),true);
                     }
+                    System.out.println("Message from " + clientThread.getId());
+
 
                 }
             }
-        }
-        try {
-            BufferedReader socIn = null;
-            socIn = new BufferedReader(
-                    new InputStreamReader(new PrintStream()));
-            PrintStream socOut = new PrintStream(clientSocket.getOutputStream());
-            while (true) {
-                String line = socIn.readLine();
-                messageSent = true;
-                socOut.println(line);
-                System.out.println("MessageState: "+messageSent);
+            if (sd.messagesToSend.size() > 0 && sd.counterRead == 0) {
+                sd.messagesToSend.remove(0);
+
             }
-        } catch (Exception e) {
-            System.err.println("Error in EchoServer:" + e);
         }
 
 
