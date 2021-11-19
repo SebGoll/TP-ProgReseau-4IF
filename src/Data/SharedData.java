@@ -13,16 +13,12 @@ public class SharedData {
 
     public List<ClientThread> threadList;
     public HashMap<SocketAddress, Long> threadTable;
-    public List<AbstractMap.SimpleEntry<String, String>> messagesToSend;
-    public Integer counterRead;
-    public HashMap<Long, Boolean> messageSent;
+    public HashMap<Long,GroupData> groupDataTable;
 
     public SharedData(){
         threadList = new LinkedList<>();
         threadTable = new HashMap<>();
-        messagesToSend = new LinkedList<>();
-        counterRead=0;
-        messageSent=new HashMap<>();
+        groupDataTable=new HashMap<>();
     }
 
 
