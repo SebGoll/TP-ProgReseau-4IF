@@ -7,12 +7,15 @@
 
 package stream;
 
+import Data.GroupData;
 import Data.SharedData;
 
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 public class EchoServerMultiThreaded {
 
@@ -31,7 +34,7 @@ public class EchoServerMultiThreaded {
         try {
             SharedData sd = new SharedData();
             listenSocket = new ServerSocket(Integer.parseInt(args[0])); //port
-
+            sd.groupDataTable.put((long) 1,new GroupData());
 
             MasterThread mt = new MasterThread(sd);
             mt.start();
@@ -43,16 +46,18 @@ public class EchoServerMultiThreaded {
                 System.out.println("Connexion from:" + clientSocket.getInetAddress());
                 System.out.println("ID: " + clientSocket.getRemoteSocketAddress());
                 ClientThread ct = new ClientThread(clientSocket,sd);
-
                 sd.threadList.add(ct);
                 sd.threadTable.put(clientSocket.getRemoteSocketAddress(), ct.getId());
-                sd.messageSent.put(ct.getId(),false);
+                for (Long groupId : sd.groupDataTable.keySet()) {
+                    sd.groupDataTable.get(groupId).messageSent.put(ct.getId(), false);
+                }
                 ct.start();
+
 
 
             }
         } catch (Exception e) {
-            System.err.println("Error in EchoServer:" + e);
+            System.err.println("Error in EchoServerMultiThreaded:" + e);
         }
     }
 }

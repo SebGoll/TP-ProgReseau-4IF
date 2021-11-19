@@ -17,22 +17,25 @@ public class MasterThread extends Thread {
                 e.printStackTrace();
             }
             for (ClientThread clientThread : sd.threadList) {
+                Long chatId= clientThread.chatId;
+                if(chatId==null)continue;
                 if (clientThread.messageSent) {
                     clientThread.messageSent = false;
-                    sd.counterRead = sd.threadList.size()-1;
+                    sd.groupDataTable.get(chatId).counterRead = sd.threadList.size()-1;
                     for (ClientThread destination : sd.threadList) {
                         if(destination.getId()==clientThread.getId())continue;
-                        sd.messageSent.put(destination.getId(),true);
+                        sd.groupDataTable.get(chatId).messageSent.put(destination.getId(),true);
                     }
                     System.out.println("Message from " + clientThread.getId());
 
 
                 }
-            }
-            if (sd.messagesToSend.size() > 0 && sd.counterRead == 0) {
-                sd.messagesToSend.remove(0);
+                if (sd.groupDataTable.get(chatId).messagesToSend.size() > 0 && sd.groupDataTable.get(chatId).counterRead == 0) {
+                    sd.groupDataTable.get(chatId).messagesToSend.remove(0);
 
+                }
             }
+
         }
 
 

@@ -22,12 +22,14 @@ public class ClientThread
     public boolean messageSent;
     public SharedData sd;
     public String nom;
+    public Long chatId;
 
 
     ClientThread(Socket s, SharedData data) {
         this.clientSocket = s;
         this.sd = data;
         this.nom = null;
+        this.chatId=null;
     }
 
     /**
@@ -41,23 +43,27 @@ public class ClientThread
             PrintStream socOut = new PrintStream(clientSocket.getOutputStream());
             socOut.println("Renseignez votre pseudonyme");
             nom = socIn.readLine();
+            socOut.println("Renseignez votre id de conv");
+            chatId = Long.parseLong(socIn.readLine());
             socOut.println("Bienvenue "+nom+" vous pouvez maintenant chatter avec vos amis !");
 
 
             while (true) {
                 if (socIn.ready()) {
                     String line = socIn.readLine();
+                    sd.groupDataTable.get(chatId).messagesToSend.add(new AbstractMap.SimpleEntry<>(line, nom));
                     messageSent = true;
-                    sd.messagesToSend.add(new AbstractMap.SimpleEntry<>(line, nom));
+
                 }
-                if (sd.messageSent.get(this.getId())) {
-                    socOut.println(sd.messagesToSend.get(0).getValue() + " : " + sd.messagesToSend.get(0).getKey());
-                    sd.messageSent.put(this.getId(), false);
-                    sd.counterRead--;
+                if (sd.groupDataTable.get(chatId).messageSent.get(this.getId())) {
+                    socOut.println(sd.groupDataTable.get(chatId).messagesToSend.get(0).getValue() + " : " + sd.groupDataTable.get(chatId).messagesToSend.get(0).getKey());
+                    sd.groupDataTable.get(chatId).messageSent.put(this.getId(), false);
+                    sd.groupDataTable.get(chatId).counterRead--;
                 }
             }
         } catch (Exception e) {
-            System.err.println("Error in EchoServer:" + e);
+            System.err.println("Error in ClientThread:" + e);
+            e.printStackTrace();
         }
     }
 
