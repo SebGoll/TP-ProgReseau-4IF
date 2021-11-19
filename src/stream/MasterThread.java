@@ -30,6 +30,9 @@ public class MasterThread extends Thread {
 
 
                 }
+
+            }
+            for(Long chatId : sd.groupDataTable.keySet()){
                 if (sd.groupDataTable.get(chatId).messagesToSend.size() > 0 && sd.groupDataTable.get(chatId).counterRead == 0) {
                     sd.groupDataTable.get(chatId).messagesToSend.remove(0);
 

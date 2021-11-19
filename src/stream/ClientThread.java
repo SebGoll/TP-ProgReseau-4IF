@@ -45,6 +45,8 @@ public class ClientThread
             nom = socIn.readLine();
             socOut.println("Renseignez votre id de conv");
             chatId = Long.parseLong(socIn.readLine());
+            sd.groupDataTable.get(chatId).groupThreadList.add(this);
+            sd.groupDataTable.get(chatId).messageSent.put(this.getId(),false);
             socOut.println("Bienvenue "+nom+" vous pouvez maintenant chatter avec vos amis !");
 
 

@@ -35,6 +35,7 @@ public class EchoServerMultiThreaded {
             SharedData sd = new SharedData();
             listenSocket = new ServerSocket(Integer.parseInt(args[0])); //port
             sd.groupDataTable.put((long) 1,new GroupData());
+            sd.groupDataTable.put((long) 2,new GroupData());
 
             MasterThread mt = new MasterThread(sd);
             mt.start();
@@ -48,9 +49,6 @@ public class EchoServerMultiThreaded {
                 ClientThread ct = new ClientThread(clientSocket,sd);
                 sd.threadList.add(ct);
                 sd.threadTable.put(clientSocket.getRemoteSocketAddress(), ct.getId());
-                for (Long groupId : sd.groupDataTable.keySet()) {
-                    sd.groupDataTable.get(groupId).messageSent.put(ct.getId(), false);
-                }
                 ct.start();
 
 
