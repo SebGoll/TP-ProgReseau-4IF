@@ -49,6 +49,7 @@ public class ClientThread
                     String line = socIn.readLine();
                     messageSent = true;
                     sd.messagesToSend.add(new AbstractMap.SimpleEntry<>(line, nom));
+                    Persistence.persist(line,0);
                 }
                 if (sd.messageSent.get(this.getId())) {
                     socOut.println(sd.messagesToSend.get(0).getValue() + " : " + sd.messagesToSend.get(0).getKey());
