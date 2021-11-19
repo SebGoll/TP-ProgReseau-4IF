@@ -27,14 +27,13 @@ public class ClientThread
     public Long chatId;
 
 
-
     ClientThread(Socket s, SharedData data) {
         this.clientSocket = s;
         this.sd = data;
 
         this.name = null;
 
-        this.chatId=null;
+        this.chatId = null;
 
     }
 
@@ -48,14 +47,14 @@ public class ClientThread
                     new InputStreamReader(clientSocket.getInputStream()));
             PrintStream socOut = new PrintStream(clientSocket.getOutputStream());
             socOut.println("Renseignez votre pseudonyme");
+            name = socIn.readLine();
             socOut.println("Renseignez votre id de conv");
             chatId = Long.parseLong(socIn.readLine());
             sd.groupDataTable.get(chatId).groupThreadList.add(this);
-            sd.groupDataTable.get(chatId).messageSent.put(this.getId(),false);
-            name = socIn.readLine();
-            socOut.println("Bienvenue "+ name +" vous pouvez maintenant chatter avec vos amis !\n");
-            Persistence.logAndLoad(name,socOut,0);
+            sd.groupDataTable.get(chatId).messageSent.put(this.getId(), false);
 
+            socOut.println("Bienvenue " + name + " vous pouvez maintenant chatter avec vos amis !\n");
+            Persistence.logAndLoad(name, socOut, chatId);
 
 
             while (true) {
@@ -63,11 +62,14 @@ public class ClientThread
                     String line = socIn.readLine();
                     sd.groupDataTable.get(chatId).messagesToSend.add(new AbstractMap.SimpleEntry<>(line, name));
                     messageSent = true;
-                    Persistence.persist(line,this.name,0);
+                    Persistence.persist(line, this.name, chatId);
 
                 }
                 if (sd.groupDataTable.get(chatId).messageSent.get(this.getId())) {
-                    socOut.println(sd.groupDataTable.get(chatId).messagesToSend.get(0).getValue() + " : " + sd.groupDataTable.get(chatId).messagesToSend.get(0).getKey());
+                    socOut.println(Persistence.ANSI_BOLD +
+                                   sd.groupDataTable.get(chatId).messagesToSend.get(0).getValue() +
+                                   Persistence.ANSI_RESET + " : " +
+                                   sd.groupDataTable.get(chatId).messagesToSend.get(0).getKey());
                     sd.groupDataTable.get(chatId).messageSent.put(this.getId(), false);
                     sd.groupDataTable.get(chatId).counterRead--;
                 }
