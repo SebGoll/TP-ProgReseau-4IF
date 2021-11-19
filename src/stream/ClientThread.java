@@ -7,6 +7,7 @@
 
 package stream;
 
+import Data.GroupData;
 import Data.SharedData;
 
 import java.io.BufferedReader;
@@ -49,7 +50,16 @@ public class ClientThread
             socOut.println("Renseignez votre pseudonyme");
             name = socIn.readLine();
             socOut.println("Renseignez votre id de conv");
-            chatId = Long.parseLong(socIn.readLine());
+            try{
+                chatId = Long.parseLong(socIn.readLine());
+
+            } catch (Exception e){
+                socOut.println("Renseignez votre id de conv");
+                chatId = Long.parseLong(socIn.readLine());
+            }
+            if (!sd.groupDataTable.containsKey(chatId)){
+                sd.groupDataTable.put(chatId,new GroupData());
+            }
             sd.groupDataTable.get(chatId).groupThreadList.add(this);
             sd.groupDataTable.get(chatId).messageSent.put(this.getId(), false);
 
