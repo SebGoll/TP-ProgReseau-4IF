@@ -21,8 +21,8 @@ public class MasterThread extends Thread {
                 if(chatId==null)continue;
                 if (clientThread.messageSent) {
                     clientThread.messageSent = false;
-                    sd.groupDataTable.get(chatId).counterRead = sd.threadList.size()-1;
-                    for (ClientThread destination : sd.threadList) {
+                    sd.groupDataTable.get(chatId).counterRead = sd.groupDataTable.get(chatId).groupThreadList.size()-1;
+                    for (ClientThread destination : sd.groupDataTable.get(chatId).groupThreadList) {
                         if(destination.getId()==clientThread.getId())continue;
                         sd.groupDataTable.get(chatId).messageSent.put(destination.getId(),true);
                     }
