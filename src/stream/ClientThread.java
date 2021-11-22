@@ -28,6 +28,8 @@ public class ClientThread
     private final CharSequence TABLE_FLIP_SEQUENCE = "\\tableFlip";
     private final CharSequence TABLE_FLIP = "(╯°□°）╯︵ ┻━┻ ";
 
+
+
 //    private final String ;
 
     public String name;
@@ -88,12 +90,17 @@ public class ClientThread
                 if (sd.groupDataTable.get(chatId).messageSent.get(this.getId())) {
                     DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM|HH:mm");
                     LocalDateTime now = LocalDateTime.now();
+                    AbstractMap.SimpleEntry<String,String> message = sd.groupDataTable.get(chatId).messagesToSend.get(0);
+                    if(message.getKey().contains("@"+this.name)){
+                        String newMessage = Persistence.ANSI_MENTIONS+message.getKey()+Persistence.ANSI_RESET;
+                        message = new AbstractMap.SimpleEntry<>(newMessage,message.getValue());
+                    }
                     socOut.println(Persistence.ANSI_DATE + "[" +
                             dtf.format(now) + "] " +
                             Persistence.ANSI_BOLD +
-                            sd.groupDataTable.get(chatId).messagesToSend.get(0).getValue() +
-                            Persistence.ANSI_RESET + " : " +
-                            sd.groupDataTable.get(chatId).messagesToSend.get(0).getKey());
+                            message.getValue() +
+                            " : " + Persistence.ANSI_RESET+
+                            message.getKey());
                     sd.groupDataTable.get(chatId).messageSent.put(this.getId(), false);
                     sd.groupDataTable.get(chatId).counterRead--;
                 }
