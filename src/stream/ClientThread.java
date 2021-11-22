@@ -25,6 +25,11 @@ public class ClientThread
     public boolean messageSent;
     public SharedData sd;
 
+    private final CharSequence TABLE_FLIP_SEQUENCE = "\\tableFlip";
+    private final CharSequence TABLE_FLIP = "(╯°□°）╯︵ ┻━┻ ";
+
+//    private final String ;
+
     public String name;
 
     public Long chatId;
@@ -72,9 +77,8 @@ public class ClientThread
             while (true) {
                 if (socIn.ready()) {
                     String line = socIn.readLine();
-                    CharSequence tableFlipCommand = "\\tableFlip";
-                    CharSequence tableFlip = "(╯°□°）╯︵ ┻━┻ ";
-                    line = line.replace(tableFlipCommand, tableFlip);
+                    line = line.replace(TABLE_FLIP_SEQUENCE, TABLE_FLIP);
+
                     sd.groupDataTable.get(chatId).messagesToSend.add(new AbstractMap.SimpleEntry<>(line, name));
                     messageSent = true;
                     DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM|HH:mm");
