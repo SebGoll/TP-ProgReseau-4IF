@@ -33,7 +33,7 @@ public class ClientThread
     public String name;
 
     public Long chatId;
-
+    private final String CHANGE_COMMAND = "\\changeto";
 
     ClientThread(Socket s, SharedData data) {
         this.clientSocket = s;
@@ -77,13 +77,33 @@ public class ClientThread
             while (true) {
                 if (socIn.ready()) {
                     String line = socIn.readLine();
-                    line = line.replace(TABLE_FLIP_SEQUENCE, TABLE_FLIP);
 
-                    sd.groupDataTable.get(chatId).messagesToSend.add(new AbstractMap.SimpleEntry<>(line, name));
-                    messageSent = true;
-                    DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM|HH:mm");
-                    LocalDateTime now = LocalDateTime.now();
-                    Persistence.persist(dtf.format(now), line, this.name, chatId);
+                    if (line.startsWith(CHANGE_COMMAND)) {
+                        String[] chars= line.split(" ");
+                        sd.groupDataTable.get(chatId).groupThreadList.remove(this);
+                        try {
+                            Long newChatId = Long.parseLong(chars[1]);
+                            assert (sd.groupDataTable.containsKey(newChatId));
+                            this.chatId = newChatId;
+
+                            sd.groupDataTable.get(chatId).groupThreadList.add(this);
+                            sd.groupDataTable.get(chatId).messageSent.put(this.getId(), false);
+                            socOut.println("Vous etes maintenant sur la conversation "+chatId);
+                        } catch ( Exception e) {
+                            socOut.println("Mauvais id de conversation");
+                            sd.groupDataTable.get(chatId).groupThreadList.add(this);
+                            continue;
+                        }
+
+                    } else {
+                        line = line.replace(TABLE_FLIP_SEQUENCE, TABLE_FLIP);
+                        sd.groupDataTable.get(chatId).messagesToSend.add(new AbstractMap.SimpleEntry<>(line, name));
+                        messageSent = true;
+                        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM|HH:mm");
+                        LocalDateTime now = LocalDateTime.now();
+                        Persistence.persist(dtf.format(now), line, this.name, chatId);
+                    }
+
                 }
                 if (sd.groupDataTable.get(chatId).messageSent.get(this.getId())) {
                     DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM|HH:mm");
