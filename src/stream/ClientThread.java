@@ -21,19 +21,19 @@ import java.util.AbstractMap;
 public class ClientThread
         extends Thread {
 
-    private Socket clientSocket;
     public boolean messageSent;
     public SharedData sd;
+    public String name;
+    public Long chatId;
 
     private final CharSequence TABLE_FLIP_SEQUENCE = "\\tableFlip";
     private final CharSequence TABLE_FLIP = "(╯°□°）╯︵ ┻━┻ ";
-
-//    private final String ;
-
-    public String name;
-
-    public Long chatId;
     private final String CHANGE_COMMAND = "\\changeto";
+    private final String INFO_COMMAND = "\\infos";
+    private final String HELP_COMMAND = "\\help";
+    private Socket clientSocket;
+
+
 
     ClientThread(Socket s, SharedData data) {
         this.clientSocket = s;
@@ -94,6 +94,20 @@ public class ClientThread
                             sd.groupDataTable.get(chatId).groupThreadList.add(this);
                             continue;
                         }
+
+                    } else if (line.equals(INFO_COMMAND)){
+                        socOut.println("Conversation n°"+chatId );
+                        socOut.println("Utilisateurs actuellements connectés :");
+                        for (ClientThread clientThread : sd.groupDataTable.get(chatId).groupThreadList){
+                            if (clientThread.equals(this)){
+                                socOut.println(Persistence.ANSI_GREEN+clientThread.name+Persistence.ANSI_RESET);
+                            } else {
+                                socOut.println(clientThread.name);
+                            }
+                        }
+                    } else if (line.equals(HELP_COMMAND)){
+                        socOut.println(INFO_COMMAND+" : Donne les informations sur la conversation actuelle\n"+
+                                CHANGE_COMMAND+" <idConv> : Change la conversation vers la conversation indiquée" );
 
                     } else {
                         line = line.replace(TABLE_FLIP_SEQUENCE, TABLE_FLIP);
