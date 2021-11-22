@@ -14,6 +14,8 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.net.Socket;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.AbstractMap;
 
 public class ClientThread
@@ -75,11 +77,16 @@ public class ClientThread
                     line = line.replace(tableFlipCommand, tableFlip);
                     sd.groupDataTable.get(chatId).messagesToSend.add(new AbstractMap.SimpleEntry<>(line, name));
                     messageSent = true;
-                    Persistence.persist(line, this.name, chatId);
-
+                    DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM|HH:mm");
+                    LocalDateTime now = LocalDateTime.now();
+                    Persistence.persist(dtf.format(now), line, this.name, chatId);
                 }
                 if (sd.groupDataTable.get(chatId).messageSent.get(this.getId())) {
-                    socOut.println(Persistence.ANSI_BOLD +
+                    DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM|HH:mm");
+                    LocalDateTime now = LocalDateTime.now();
+                    socOut.println(Persistence.ANSI_DATE + "[" +
+                            dtf.format(now) + "] " +
+                            Persistence.ANSI_BOLD +
                             sd.groupDataTable.get(chatId).messagesToSend.get(0).getValue() +
                             Persistence.ANSI_RESET + " : " +
                             sd.groupDataTable.get(chatId).messagesToSend.get(0).getKey());

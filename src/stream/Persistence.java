@@ -7,6 +7,8 @@ public class Persistence {
     public static final String ANSI_RESET = "\u001B[0m";
     public static final String ANSI_GREEN = "\u001B[32m";
     public static final String ANSI_BOLD = "\u001B[1m";
+    public static final String ANSI_DATE = "\u001B[35m";
+
 
     public static void logAndLoad(String name, PrintStream out, long idConv) {
         try {
@@ -25,11 +27,11 @@ public class Persistence {
             while (reader.hasNextLine()) {
                 String line = reader.nextLine();
 
-                String[] data = line.split(":", 2);
-                if (data[0].equals(name)) {
-                    out.println(ANSI_GREEN + data[1] + ANSI_RESET);
+                String[] data = line.split(" ", 3);
+                if (data[1].equals(name)) {
+                    out.println(ANSI_GREEN+data[0]+" "+ANSI_BOLD + data[1] +" "+ data[2]+ANSI_RESET);
                 } else {
-                    out.println(ANSI_BOLD + data[0] + " : " + ANSI_RESET + data[1]);
+                    out.println(ANSI_DATE+data[0]+" " +ANSI_BOLD + data[1] +" "+ ANSI_RESET + data[2]);
                 }
             }
             reader.close();
@@ -40,12 +42,12 @@ public class Persistence {
 
     }
 
-    public static void persist(String message, String name, long idConv) {
+    public static void persist(String Date,String message, String name, long idConv) {
 
 
         try {
             FileWriter writerToPersistenceFile = new FileWriter("PersistenceData/PersistenceData_" + idConv, true);
-            writerToPersistenceFile.write(name + ":" + message);
+            writerToPersistenceFile.write("["+Date+ "] "+name + " : " + message);
             writerToPersistenceFile.write('\n');
             writerToPersistenceFile.close();
             System.out.println("Message successfully persisted.");
