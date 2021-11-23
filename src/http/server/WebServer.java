@@ -5,10 +5,11 @@ package http.server;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Scanner;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.*;
 
 /**
  * Example program from Chapter 1 Programming Spiders, Bots and Aggregators in
@@ -21,6 +22,72 @@ import java.util.Scanner;
  * @version 1.0
  */
 public class WebServer {
+
+    protected PrintWriter out;
+
+
+    protected void methodGET(List<String> requestHeader,Socket s) throws IOException {
+        System.out.println("Method GET : " + requestHeader.get(0));
+        String[] temp = requestHeader.get(0).split(" ");
+        String ressource = temp[1];
+        String ressourceType = ressource.split("\\.")[1];
+        switch (ressourceType){
+            case "html":
+                showPage(ressource);
+                break;
+            case "png":
+
+                File image = new File("pageHTML"+ressource);
+
+
+                if(image.isFile()){
+                    System.out.println(image.length());
+                    returnHeader(200,"image/png",image.length());
+                    Scanner sc = new Scanner(image,StandardCharsets.UTF_8);
+                    while(sc.hasNextByte()){
+                        Byte b = sc.nextByte();
+                        out.println(b);
+                        System.out.println(b);
+                    }
+                    out.println();
+
+//                    BufferedReader reader = new BufferedReader(
+//                            new InputStreamReader(
+//                                    new FileInputStream(image),
+//                                    StandardCharsets.UTF_8));
+//
+//                    int c;
+//                    while((c = reader.read()) != -1) {
+//                        out.print(c);
+//                        // Do something with your character
+//                    }
+
+
+//                    Files.copy(image.toPath(), s.getOutputStream());
+                }
+
+                break;
+
+        }
+
+    }
+
+    protected void methodPOST(List<String> requestHeader, BufferedReader in) throws IOException {
+        Integer contentLength = Integer.parseInt(requestHeader.get(3).split(": ")[1]);
+        System.out.println("Method POST : " + requestHeader.get(0));
+        char[] postArguments = new char[contentLength];
+        in.read(postArguments, 0, contentLength);
+        String[] postArgumentsList = String.valueOf(postArguments).split("&");
+        HashMap<String, String> postArgumentsHashTable = new HashMap<>();
+        for (String argument : postArgumentsList) {
+            postArgumentsHashTable.put(argument.split("=")[0], argument.split("=")[1]);
+        }
+
+        returnHeader(200, "text/plain",(long)0);
+
+        out.println("Nom = " + postArgumentsHashTable.get("lname"));
+        out.println("Prenom = " + postArgumentsHashTable.get("fname"));
+    }
 
     /**
      * WebServer constructor.
@@ -47,52 +114,33 @@ public class WebServer {
                 System.out.println("Connection, sending data.");
                 BufferedReader in = new BufferedReader(new InputStreamReader(
                         remote.getInputStream()));
-                PrintWriter out = new PrintWriter(remote.getOutputStream());
+                out = new PrintWriter(remote.getOutputStream());
 
                 // read the data sent. We basically ignore it,
                 // stop reading once a blank line is hit. This
                 // blank line signals the end of the client HTTP
                 // headers.
                 String str = ".";
-                List<String> usefulData = new ArrayList<>();
+                List<String> httpRequest = new ArrayList<>();
                 while (str != null && !str.equals("")) {
-                    System.out.println(str);
-                    if (str.startsWith("GET")) {
-
-                        String[] method  = str.split(" ");
-                        usefulData.add(method[0]);
-                        usefulData.add(method[1]);
-
-
-                    }
-                    if (str.startsWith("POST")) {
-
-                        String[] method  = str.split(" ");
-                        usefulData.add(method[0]);
-                        usefulData.add(method[1]);
-
-                    }
                     str = in.readLine();
-
+                    httpRequest.add(str);
                 }
-                System.out.println(usefulData);
-                showPage(usefulData.get(1),out);
-                switch (usefulData.get(0)){
+                System.out.println(httpRequest);
+
+                switch (httpRequest.get(0).split(" ")[0]) {
                     case "GET":
+                        methodGET(httpRequest,remote);
                         break;
+
                     case "POST":
-                        str=".";
-                        for(int i=0;i<10;i++){
-                            System.out.println("i "+in.readLine());
-                        }
-//                        while (str != null && !str.equals("")) {
-//                            System.out.println(str);
-//                            str = in.readLine();
-//                        }
+                        methodPOST(httpRequest, in);
                         break;
+
                     case "DELETE":
                         break;
-                    case "HEA":
+                    case "HEAD":
+                        returnHeader(200, "text/html",(long)0);
                         break;
                     case "PUT":
                         break;
@@ -111,7 +159,7 @@ public class WebServer {
                 out.flush();
                 remote.close();
             } catch (Exception e) {
-                System.out.println("Error: " + e);
+                e.printStackTrace();
             }
         }
     }
@@ -126,7 +174,7 @@ public class WebServer {
         ws.start();
     }
 
-    protected void showPage(String page, PrintWriter out) {
+    protected void showPage(String page) {
 
         System.out.println(page);
 
@@ -134,21 +182,27 @@ public class WebServer {
         if (f.exists() && !f.isDirectory()) {
             // Send the response
             // Send the headers
-            out.println("HTTP/1.0 200 OK");
-            out.println("Content-Type: text/html");
-            out.println("Server: Bot");
-            // this blank line signals the end of the headers
-            out.println("");
-
+            returnHeader(200, "text/html",(long)0);
             // Send the HTML page
             try {
-                Scanner scanner = new Scanner(f);
+                Scanner scanner = new Scanner(f,StandardCharsets.UTF_8);
                 while (scanner.hasNextLine()) {
                     out.println(scanner.nextLine());
                 }
-            } catch (FileNotFoundException e) {
+            } catch (IOException e) {
                 e.printStackTrace();
             }
         }
+    }
+
+    protected void returnHeader(Integer code, String type,Long Size) {
+        out.println("HTTP/1.0 " + code + " OK");
+        out.println("Content-Type: " + type);
+        if(Objects.equals(type, "image/png")){
+//            out.println("Content-Length:"+Size);
+        }
+        out.println("Server: Bot");
+        // this blank line signals the end of the headers
+        out.println("");
     }
 }
