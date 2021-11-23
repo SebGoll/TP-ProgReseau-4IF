@@ -29,15 +29,15 @@ public class WebServer {
     protected void methodGET(List<String> requestHeader,Socket s) throws IOException {
         System.out.println("Method GET : " + requestHeader.get(0));
         String[] temp = requestHeader.get(0).split(" ");
-        String ressource = temp[1];
+        String ressource = "pageHTML"+temp[1];
         String ressourceType = ressource.split("\\.")[1];
         switch (ressourceType){
             case "html":
-                showPage(ressource);
+                showPage(ressource,200);
                 break;
             case "png":
 
-                File image = new File("pageHTML"+ressource);
+                File image = new File(ressource);
 
 
                 if(image.isFile()){
@@ -82,11 +82,29 @@ public class WebServer {
         for (String argument : postArgumentsList) {
             postArgumentsHashTable.put(argument.split("=")[0], argument.split("=")[1]);
         }
+        String path = "pageHTML/" + postArgumentsHashTable.get("fname") + postArgumentsHashTable.get("lname")+".html";
+        File personFile= new File(path);
 
-        returnHeader(200, "text/plain",(long)0);
+        if (personFile.createNewFile()) {
 
-        out.println("Nom = " + postArgumentsHashTable.get("lname"));
-        out.println("Prenom = " + postArgumentsHashTable.get("fname"));
+            String content = Files.readString(Path.of("pageHTML/template.html"));
+            String title = "Page de "+postArgumentsHashTable.get("lname");
+            String body = "<h1>Nom = " + postArgumentsHashTable.get("lname")+"</h1>\n"+
+                    "<h1>Prenom = " + postArgumentsHashTable.get("fname")+"</h1>\n";
+            content = content.replace("$title", title);
+            content = content.replace("$body", body);
+
+
+            personFile.setWritable(true);
+            FileWriter fw = new FileWriter(personFile);
+            fw.write(content);
+            fw.close();
+            showPage(path,201);
+        } else {
+            showPage(path,200);
+        }
+
+
     }
 
     /**
@@ -174,15 +192,15 @@ public class WebServer {
         ws.start();
     }
 
-    protected void showPage(String page) {
+    protected void showPage(String page,Integer code) {
 
         System.out.println(page);
 
-        File f = new File("pageHTML" + page);
+        File f = new File( page);
         if (f.exists() && !f.isDirectory()) {
             // Send the response
             // Send the headers
-            returnHeader(200, "text/html",(long)0);
+            returnHeader(code, "text/html",(long)0);
             // Send the HTML page
             try {
                 Scanner scanner = new Scanner(f,StandardCharsets.UTF_8);
