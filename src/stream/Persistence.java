@@ -17,6 +17,7 @@ public class Persistence {
     public static final String ANSI_GREEN = "\u001B[32m";
     public static final String ANSI_BOLD = "\u001B[1m";
     public static final String ANSI_DATE = "\u001B[35m";
+    public static final String ANSI_MENTIONS = "\u001B[48;5;58;38;5;11m";
 
     /**
      * load a conversation when a user log in
@@ -45,7 +46,13 @@ public class Persistence {
                 if (data[1].equals(name)) {
                     out.println(ANSI_GREEN + data[0] + " " + ANSI_BOLD + data[1] + " " + data[2] + ANSI_RESET);
                 } else {
-                    out.println(ANSI_DATE + data[0] + " " + ANSI_BOLD + data[1] + " " + ANSI_RESET + data[2]);
+                    String[] message = data[2].split(": ",2);
+                    if(data[2].contains("@"+name)){
+                        out.println(ANSI_DATE+data[0]+" " +ANSI_BOLD + data[1] +" : "+ ANSI_RESET +ANSI_MENTIONS+ message[1]+ANSI_RESET);
+                    }else {
+                        out.println(ANSI_DATE + data[0] + " " + ANSI_BOLD + data[1] +" : "+ ANSI_RESET + message[1]);
+                    }
+
                 }
             }
             reader.close();
