@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Page de HASENFRATZ</title>
+</head>
+<body><h1>Nom = HASENFRATZ</h1>
+<h1>Prenom = LOUIS</h1>
+
+<a href="." onclick="sendDelete()">delete</a>
+</body>
+<script>
+    function sendDelete() {
+        var xhttp = new XMLHttpRequest();
+        xhttp.open("DELETE","/LOUISHASENFRATZ.html", true);
+        xhttp.send();
+    }
+</script>
+</html>
