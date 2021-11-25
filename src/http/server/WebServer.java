@@ -31,7 +31,7 @@ public class WebServer {
         switch (ressourceType) {
             case "html" -> ressourceType = "text/html";
             case "png" -> ressourceType = "image/png";
-            case "mp3" -> ressourceType = "audio/mp3";
+            case "mp3" -> ressourceType = "audio/mpeg";
             default -> ressourceType = "text/plain";
         }
         File file = new File(ressource);
@@ -61,12 +61,12 @@ public class WebServer {
         String[] temp = requestHeader.get(0).split(" ");
         String ressource = "pageHTML"+temp[1];
         if(Objects.equals(temp[1], "/")){
-            returnHeader(405,"text/plain",(long)0);
+            returnHeader(405,"text/plain");
             return;
         }
         File fileToDelete = new File(ressource);
         fileToDelete.delete();
-        returnHeader(200,"text/plain",(long)0);
+        returnHeader(200,"text/plain");
 
     }
     protected void methodPOST(List<String> requestHeader, BufferedReader in) throws IOException {
