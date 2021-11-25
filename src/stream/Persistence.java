@@ -29,9 +29,9 @@ public class Persistence {
 
                 String[] data = line.split(" ", 3);
                 if (data[1].equals(name)) {
-                    out.println(ANSI_GREEN+data[0]+" "+ANSI_BOLD + data[1] +" "+ data[2]+ANSI_RESET);
+                    out.println(ANSI_GREEN + data[0] + " " + ANSI_BOLD + data[1] + " " + data[2] + ANSI_RESET);
                 } else {
-                    out.println(ANSI_DATE+data[0]+" " +ANSI_BOLD + data[1] +" "+ ANSI_RESET + data[2]);
+                    out.println(ANSI_DATE + data[0] + " " + ANSI_BOLD + data[1] + " " + ANSI_RESET + data[2]);
                 }
             }
             reader.close();
@@ -42,12 +42,12 @@ public class Persistence {
 
     }
 
-    public static void persist(String Date,String message, String name, long idConv) {
+    public static void persist(String Date, String message, String name, long idConv) {
 
 
         try {
             FileWriter writerToPersistenceFile = new FileWriter("PersistenceData/PersistenceData_" + idConv, true);
-            writerToPersistenceFile.write("["+Date+ "] "+name + " : " + message);
+            writerToPersistenceFile.write("[" + Date + "] " + name + " : " + message);
             writerToPersistenceFile.write('\n');
             writerToPersistenceFile.close();
             System.out.println("Message successfully persisted.");

@@ -18,20 +18,19 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.AbstractMap;
 
-public class ClientThread
-        extends Thread {
+public class ClientThread extends Thread {
 
-    private Socket clientSocket;
     public boolean messageSent;
     public SharedData sd;
-
     public String name;
-
     public Long chatId;
+
+    private final Socket CLIENTSOCKET;
+
 
 
     ClientThread(Socket s, SharedData data) {
-        this.clientSocket = s;
+        this.CLIENTSOCKET = s;
         this.sd = data;
 
         this.name = null;
@@ -45,10 +44,10 @@ public class ClientThread
      **/
     public void run() {
         try {
-            BufferedReader socIn = null;
-            socIn = new BufferedReader(
-                    new InputStreamReader(clientSocket.getInputStream()));
-            PrintStream socOut = new PrintStream(clientSocket.getOutputStream());
+            BufferedReader socIn = new BufferedReader(
+                    new InputStreamReader(CLIENTSOCKET.getInputStream()));
+            PrintStream socOut = new PrintStream(CLIENTSOCKET.getOutputStream());
+            //connexion d'un utilisateur
             socOut.println("Renseignez votre pseudonyme");
             name = socIn.readLine();
             socOut.println("Renseignez votre id de conv");
@@ -68,7 +67,7 @@ public class ClientThread
             socOut.println("Bienvenue " + name + " vous pouvez maintenant chatter avec vos amis !\n");
             Persistence.logAndLoad(name, socOut, chatId);
 
-
+            //reception des messages et de l'utilisateur du thread et envoie des autres messages
             while (true) {
                 if (socIn.ready()) {
                     String line = socIn.readLine();
@@ -76,7 +75,7 @@ public class ClientThread
                     messageSent = true;
                     DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM|HH:mm");
                     LocalDateTime now = LocalDateTime.now();
-                    Persistence.persist(dtf.format(now),line, this.name, chatId);
+                    Persistence.persist(dtf.format(now), line, this.name, chatId);
                 }
                 if (sd.groupDataTable.get(chatId).messageSent.get(this.getId())) {
                     DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM|HH:mm");

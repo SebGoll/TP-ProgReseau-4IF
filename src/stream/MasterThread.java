@@ -28,9 +28,7 @@ public class MasterThread extends Thread {
                     }
                     System.out.println("Message from " + clientThread.getId());
 
-
                 }
-
             }
             for(Long chatId : sd.groupDataTable.keySet()){
                 if (sd.groupDataTable.get(chatId).messagesToSend.size() > 0 && sd.groupDataTable.get(chatId).counterRead == 0) {
@@ -38,10 +36,6 @@ public class MasterThread extends Thread {
 
                 }
             }
-
         }
-
-
     }
-
 }

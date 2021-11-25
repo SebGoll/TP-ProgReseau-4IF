@@ -15,10 +15,10 @@ public class GroupData {
     public HashMap<Long, Boolean> messageSent;
     public List<ClientThread> groupThreadList;
 
-    public GroupData(){
+    public GroupData() {
         messagesToSend = new LinkedList<>();
-        counterRead=0;
-        messageSent=new HashMap<>();
+        counterRead = 0;
+        messageSent = new HashMap<>();
         groupThreadList = new LinkedList<>();
 
     }
