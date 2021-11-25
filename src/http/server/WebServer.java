@@ -10,6 +10,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
+
 /**
  * Example program from Chapter 1 Programming Spiders, Bots and Aggregators in
  * Java Copyright 2001 by Jeff Heaton
@@ -26,30 +27,39 @@ public class WebServer {
     protected Socket remote;
 
     protected void error404() throws IOException {
-        returnHeader(404,"text/html");
+        returnHeader(404, "text/html");
         out.flush();
 
 
-
-        Files.copy(Path.of("ressources/error404.html"),remote.getOutputStream());
+        Files.copy(Path.of("ressources/error404.html"), remote.getOutputStream());
 
     }
 
     protected void error400() throws IOException {
-        returnHeader(400,"text/html");
+        returnHeader(400, "text/html");
         out.flush();
 
-        Files.copy(Path.of("ressources/error400.html"),remote.getOutputStream());
+        Files.copy(Path.of("ressources/error400.html"), remote.getOutputStream());
     }
 
-    protected void error405() throws IOException {
-        returnHeader(405,"text/html");
+    protected void error405() {
+        returnHeader(405, "text/html");
+        out.flush();
+    }
+
+    protected void error500() {
+        returnHeader(500, "text/html");
         out.flush();
 
-        Files.copy(Path.of("ressources/error405.html"),remote.getOutputStream());
+        try {
+            Files.copy(Path.of("ressources/error500.html"), remote.getOutputStream());
+        } catch (Exception e) {
+            System.out.println("Erreur de connection");
+            e.printStackTrace();
+        }
     }
 
-    protected void displayRessource(String ressource, String ressourceType) throws IOException {
+    protected void displayRessource(String ressource, String ressourceType) {
         switch (ressourceType) {
             case "html" -> ressourceType = "text/html";
             case "png" -> ressourceType = "image/png";
@@ -62,24 +72,29 @@ public class WebServer {
         }
         File file = new File(ressource);
         System.out.println(file);
-        if (file.isFile()) {
+        try {
+            if (file.isFile()) {
 
-            returnHeader(200, ressourceType);
+                returnHeader(200, ressourceType);
 
-            Files.copy(file.toPath(), remote.getOutputStream());
+                Files.copy(file.toPath(), remote.getOutputStream());
 
-        } else {
-            error404();
+            } else {
+                error404();
+            }
+        } catch (Exception e) {
+            error500();
+            e.printStackTrace();
         }
     }
 
 
-    protected void methodGET(List<String> requestHeader) throws IOException {
+    protected void methodGET(List<String> requestHeader) {
         System.out.println("Method GET : " + requestHeader.get(0));
         String[] temp = requestHeader.get(0).split(" ");
         String ressource = "ressources" + temp[1];
-        if(Objects.equals(temp[1], "/")){
-            ressource="ressources/index.html";
+        if (Objects.equals(temp[1], "/")) {
+            ressource = "ressources/index.html";
 
         }
         String ressourceType = ressource.split("\\.")[1];
@@ -87,23 +102,68 @@ public class WebServer {
 
     }
 
+    protected void methodHEAD(List<String> requestHeader) {
+        System.out.println("Method GET : " + requestHeader.get(0));
+        String[] temp = requestHeader.get(0).split(" ");
+        String ressource = "ressources" + temp[1];
+        if (Objects.equals(temp[1], "/")) {
+            ressource = "ressources/index.html";
+
+        }
+        String ressourceType = ressource.split("\\.")[1];
+
+        switch (ressourceType) {
+            case "html" -> ressourceType = "text/html";
+            case "png" -> ressourceType = "image/png";
+            case "gif" -> ressourceType = "image/gif";
+            case "mp4" -> ressourceType = "video/mp4";
+
+            case "ico" -> ressourceType = "image/x-icon";
+            case "mp3" -> ressourceType = "audio/mpeg";
+            default -> ressourceType = "text/plain";
+        }
+        File file = new File(ressource);
+        System.out.println(file);
+
+        if (file.isFile()) {
+            returnHeader(200, ressourceType);
+        } else {
+            try {
+                error404();
+            } catch (Exception e) {
+                error500();
+            }
+        }
+
+    }
+
     private void methodDELETE(List<String> requestHeader) {
         String[] temp = requestHeader.get(0).split(" ");
-        String ressource = "ressources"+temp[1];
-        if(Objects.equals(temp[1], "/")){
-            returnHeader(405,"text/plain");
+        String ressource = "ressources" + temp[1];
+        if (Objects.equals(temp[1], "/")) {
+            try {
+                error405();
+            } catch (Exception e) {
+                error500();
+            }
             return;
         }
         File fileToDelete = new File(ressource);
         fileToDelete.delete();
-        returnHeader(200,"text/plain");
+        returnHeader(200, "text/plain");
 
     }
-    protected void methodPOST(List<String> requestHeader, BufferedReader in) throws IOException {
+
+    protected void methodPOST(List<String> requestHeader, BufferedReader in){
         Integer contentLength = Integer.parseInt(requestHeader.get(3).split(": ")[1]);
         System.out.println("Method POST : " + requestHeader.get(0));
         char[] postArguments = new char[contentLength];
-        in.read(postArguments, 0, contentLength);
+        try {
+            in.read(postArguments, 0, contentLength);
+        } catch (IOException e) {
+            error500();
+            e.printStackTrace();
+        }
         String[] postArgumentsList = String.valueOf(postArguments).split("&");
         HashMap<String, String> postArgumentsHashTable = new HashMap<>();
         for (String argument : postArgumentsList) {
@@ -113,25 +173,30 @@ public class WebServer {
         String path = "ressources/" + postArgumentsHashTable.get("fname") + postArgumentsHashTable.get("lname") + ".html";
         File personFile = new File(path);
 
-        if (personFile.createNewFile()) {
+        try {
+            if (personFile.createNewFile()) {
 
-            String content = Files.readString(Path.of("ressources/template.html"));
-            String title = "Page de " + postArgumentsHashTable.get("lname");
-            String body = "<h1>Nom = " + postArgumentsHashTable.get("lname") + "</h1>\n" +
-                    "<h1>Prenom = " + postArgumentsHashTable.get("fname") + "</h1>\n";
-            String pageName = postArgumentsHashTable.get("fname") + postArgumentsHashTable.get("lname")+".html";
+                String content = Files.readString(Path.of("ressources/template.html"));
+                String title = "Page de " + postArgumentsHashTable.get("lname");
+                String body = "<h1>Nom = " + postArgumentsHashTable.get("lname") + "</h1>\n" +
+                        "<h1>Prenom = " + postArgumentsHashTable.get("fname") + "</h1>\n";
+                String pageName = postArgumentsHashTable.get("fname") + postArgumentsHashTable.get("lname") + ".html";
 
-            content = content.replace("$title", title);
-            content = content.replace("$body", body);
-            content = content.replace("$pagename", pageName);
+                content = content.replace("$title", title);
+                content = content.replace("$body", body);
+                content = content.replace("$pagename", pageName);
 
 
-            FileWriter fw = new FileWriter(personFile);
-            fw.write(content);
-            fw.close();
-            showPage(path, 201);
-        } else {
-            showPage(path, 200);
+                FileWriter fw = new FileWriter(personFile);
+                fw.write(content);
+                fw.close();
+                showPage(path, 201);
+            } else {
+                showPage(path, 200);
+            }
+        } catch (IOException e) {
+            error500();
+            e.printStackTrace();
         }
 
 
@@ -195,16 +260,18 @@ public class WebServer {
                         break;
                     case "PUT":
                         break;
+                    default:
+                        error400();
                 }
 
                 out.flush();
                 remote.close();
             } catch (Exception e) {
+                error500();
                 e.printStackTrace();
             }
         }
     }
-
 
 
     /**
@@ -234,6 +301,7 @@ public class WebServer {
                 }
                 scanner.close();
             } catch (IOException e) {
+                error500();
                 e.printStackTrace();
             }
         }
