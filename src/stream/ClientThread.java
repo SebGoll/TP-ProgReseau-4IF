@@ -1,5 +1,6 @@
 /**
- *ClientThread
+ * ClientThread
+ *
  * @author Louis Hasenfratz,Sebastien Goll
  */
 
@@ -75,7 +76,7 @@ public class ClientThread extends Thread {
             sd.groupDataTable.get(chatId).groupThreadList.add(this);
             sd.groupDataTable.get(chatId).messageSent.put(this.getId(), false);
 
-            socOut.println("Bienvenue " + name + " vous pouvez maintenant chatter avec vos amis !\n");
+            socOut.println("Bienvenue " + name + " vous pouvez maintenant chatter avec vos amis !\n\\help pour voir les commandes disponibles\n");
             Persistence.logAndLoad(name, socOut, chatId);
 
 
@@ -84,7 +85,7 @@ public class ClientThread extends Thread {
                 if (socIn.ready()) {
                     String line = socIn.readLine();
                     if (line.startsWith(CHANGE_COMMAND)) {
-                        String[] chars= line.split(" ");
+                        String[] chars = line.split(" ");
                         sd.groupDataTable.get(chatId).groupThreadList.remove(this);
                         try {
                             Long newChatId = Long.parseLong(chars[1]);
@@ -93,26 +94,26 @@ public class ClientThread extends Thread {
 
                             sd.groupDataTable.get(chatId).groupThreadList.add(this);
                             sd.groupDataTable.get(chatId).messageSent.put(this.getId(), false);
-                            socOut.println("Vous etes maintenant sur la conversation "+chatId);
-                        } catch ( Exception e) {
+                            socOut.println("Vous etes maintenant sur la conversation " + chatId);
+                        } catch (Exception e) {
                             socOut.println("Mauvais id de conversation");
                             sd.groupDataTable.get(chatId).groupThreadList.add(this);
                             continue;
                         }
 
-                    } else if (line.equals(INFO_COMMAND)){
-                        socOut.println("Conversation n°"+chatId );
+                    } else if (line.equals(INFO_COMMAND)) {
+                        socOut.println("Conversation n°" + chatId);
                         socOut.println("Utilisateurs actuellements connectés :");
-                        for (ClientThread clientThread : sd.groupDataTable.get(chatId).groupThreadList){
-                            if (clientThread.equals(this)){
-                                socOut.println(Persistence.ANSI_GREEN+clientThread.name+Persistence.ANSI_RESET);
+                        for (ClientThread clientThread : sd.groupDataTable.get(chatId).groupThreadList) {
+                            if (clientThread.equals(this)) {
+                                socOut.println(Persistence.ANSI_GREEN + clientThread.name + Persistence.ANSI_RESET);
                             } else {
                                 socOut.println(clientThread.name);
                             }
                         }
-                    } else if (line.equals(HELP_COMMAND)){
-                        socOut.println(INFO_COMMAND+" : Donne les informations sur la conversation actuelle\n"+
-                                CHANGE_COMMAND+" <idConv> : Change la conversation vers la conversation indiquée" );
+                    } else if (line.equals(HELP_COMMAND)) {
+                        socOut.println(INFO_COMMAND + " : Donne les informations sur la conversation actuelle\n" +
+                                CHANGE_COMMAND + " <idConv> : Change la conversation vers la conversation indiquée");
 
                     } else {
                         line = line.replace(TABLE_FLIP_SEQUENCE, TABLE_FLIP);
@@ -128,16 +129,16 @@ public class ClientThread extends Thread {
                 if (sd.groupDataTable.get(chatId).messageSent.get(this.getId())) {
                     DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM|HH:mm");
                     LocalDateTime now = LocalDateTime.now();
-                    AbstractMap.SimpleEntry<String,String> message = sd.groupDataTable.get(chatId).messagesToSend.get(0);
-                    if(message.getKey().contains("@"+this.name)){
-                        String newMessage = Persistence.ANSI_MENTIONS+message.getKey()+Persistence.ANSI_RESET;
-                        message = new AbstractMap.SimpleEntry<>(newMessage,message.getValue());
+                    AbstractMap.SimpleEntry<String, String> message = sd.groupDataTable.get(chatId).messagesToSend.get(0);
+                    if (message.getKey().contains("@" + this.name)) {
+                        String newMessage = Persistence.ANSI_MENTIONS + message.getKey() + Persistence.ANSI_RESET;
+                        message = new AbstractMap.SimpleEntry<>(newMessage, message.getValue());
                     }
                     socOut.println(Persistence.ANSI_DATE + "[" +
                             dtf.format(now) + "] " +
                             Persistence.ANSI_BOLD +
                             message.getValue() +
-                            " : " + Persistence.ANSI_RESET+
+                            " : " + Persistence.ANSI_RESET +
                             message.getKey());
                     sd.groupDataTable.get(chatId).messageSent.put(this.getId(), false);
                     sd.groupDataTable.get(chatId).counterRead--;
