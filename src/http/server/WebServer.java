@@ -10,7 +10,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
-
 /**
  * Example program from Chapter 1 Programming Spiders, Bots and Aggregators in
  * Java Copyright 2001 by Jeff Heaton
@@ -30,6 +29,9 @@ public class WebServer {
         System.out.println("Method GET : " + requestHeader.get(0));
         String[] temp = requestHeader.get(0).split(" ");
         String ressource = "pageHTML"+temp[1];
+        if(Objects.equals(temp[1], "/")){
+            ressource="pageHTML/index.html";
+        }
         String ressourceType = ressource.split("\\.")[1];
         switch (ressourceType){
             case "html":
@@ -72,6 +74,18 @@ public class WebServer {
 
     }
 
+    private void methodDELETE(List<String> requestHeader) {
+        String[] temp = requestHeader.get(0).split(" ");
+        String ressource = "pageHTML"+temp[1];
+        if(Objects.equals(temp[1], "/")){
+            returnHeader(405,"text/plain",(long)0);
+            return;
+        }
+        File fileToDelete = new File(ressource);
+        fileToDelete.delete();
+        returnHeader(200,"text/plain",(long)0);
+
+    }
     protected void methodPOST(List<String> requestHeader, BufferedReader in) throws IOException {
         Integer contentLength = Integer.parseInt(requestHeader.get(3).split(": ")[1]);
         System.out.println("Method POST : " + requestHeader.get(0));
@@ -84,21 +98,22 @@ public class WebServer {
         }
         String path = "pageHTML/" + postArgumentsHashTable.get("fname") + postArgumentsHashTable.get("lname")+".html";
         File personFile= new File(path);
-
         if (personFile.createNewFile()) {
 
             String content = Files.readString(Path.of("pageHTML/template.html"));
             String title = "Page de "+postArgumentsHashTable.get("lname");
             String body = "<h1>Nom = " + postArgumentsHashTable.get("lname")+"</h1>\n"+
                     "<h1>Prenom = " + postArgumentsHashTable.get("fname")+"</h1>\n";
+            String pageName = postArgumentsHashTable.get("fname") + postArgumentsHashTable.get("lname")+".html";
             content = content.replace("$title", title);
             content = content.replace("$body", body);
+            content = content.replace("$pagename", pageName);
 
 
-            personFile.setWritable(true);
             FileWriter fw = new FileWriter(personFile);
             fw.write(content);
             fw.close();
+
             showPage(path,201);
         } else {
             showPage(path,200);
@@ -156,6 +171,7 @@ public class WebServer {
                         break;
 
                     case "DELETE":
+                        methodDELETE(httpRequest);
                         break;
                     case "HEAD":
                         returnHeader(200, "text/html",(long)0);
@@ -182,6 +198,8 @@ public class WebServer {
         }
     }
 
+
+
     /**
      * Start the application.
      *
@@ -207,6 +225,7 @@ public class WebServer {
                 while (scanner.hasNextLine()) {
                     out.println(scanner.nextLine());
                 }
+                scanner.close();
             } catch (IOException e) {
                 e.printStackTrace();
             }
