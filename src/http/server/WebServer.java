@@ -24,51 +24,36 @@ import java.util.*;
 public class WebServer {
 
     protected PrintWriter out;
+    protected Socket remote;
 
 
-    protected void methodGET(List<String> requestHeader,Socket s) throws IOException {
+    protected void displayRessource(String ressource, String ressourceType) throws IOException {
+        switch (ressourceType) {
+            case "html" -> ressourceType = "text/html";
+            case "png" -> ressourceType = "image/png";
+            case "mp3" -> ressourceType = "audio/mp3";
+            default -> ressourceType = "text/plain";
+        }
+        File file = new File(ressource);
+
+        if (file.isFile()) {
+
+            returnHeader(200, ressourceType);
+
+            Files.copy(file.toPath(), remote.getOutputStream());
+
+        } else {
+            System.out.println("Erreur 404");
+        }
+    }
+
+
+    protected void methodGET(List<String> requestHeader) throws IOException {
         System.out.println("Method GET : " + requestHeader.get(0));
         String[] temp = requestHeader.get(0).split(" ");
-        String ressource = "pageHTML"+temp[1];
+        String ressource = "ressources" + temp[1];
         String ressourceType = ressource.split("\\.")[1];
-        switch (ressourceType){
-            case "html":
-                showPage(ressource,200);
-                break;
-            case "png":
-
-                File image = new File(ressource);
-
-
-                if(image.isFile()){
-                    System.out.println(image.length());
-                    returnHeader(200,"image/png",image.length());
-                    Scanner sc = new Scanner(image,StandardCharsets.UTF_8);
-                    while(sc.hasNextByte()){
-                        Byte b = sc.nextByte();
-                        out.println(b);
-                        System.out.println(b);
-                    }
-                    out.println();
-
-//                    BufferedReader reader = new BufferedReader(
-//                            new InputStreamReader(
-//                                    new FileInputStream(image),
-//                                    StandardCharsets.UTF_8));
-//
-//                    int c;
-//                    while((c = reader.read()) != -1) {
-//                        out.print(c);
-//                        // Do something with your character
-//                    }
-
-
-//                    Files.copy(image.toPath(), s.getOutputStream());
-                }
-
-                break;
-
-        }
+        displayRessource(ressource, ressourceType);
 
     }
 
@@ -82,15 +67,15 @@ public class WebServer {
         for (String argument : postArgumentsList) {
             postArgumentsHashTable.put(argument.split("=")[0], argument.split("=")[1]);
         }
-        String path = "pageHTML/" + postArgumentsHashTable.get("fname") + postArgumentsHashTable.get("lname")+".html";
-        File personFile= new File(path);
+        String path = "ressources/" + postArgumentsHashTable.get("fname") + postArgumentsHashTable.get("lname") + ".html";
+        File personFile = new File(path);
 
         if (personFile.createNewFile()) {
 
-            String content = Files.readString(Path.of("pageHTML/template.html"));
-            String title = "Page de "+postArgumentsHashTable.get("lname");
-            String body = "<h1>Nom = " + postArgumentsHashTable.get("lname")+"</h1>\n"+
-                    "<h1>Prenom = " + postArgumentsHashTable.get("fname")+"</h1>\n";
+            String content = Files.readString(Path.of("ressources/template.html"));
+            String title = "Page de " + postArgumentsHashTable.get("lname");
+            String body = "<h1>Nom = " + postArgumentsHashTable.get("lname") + "</h1>\n" +
+                    "<h1>Prenom = " + postArgumentsHashTable.get("fname") + "</h1>\n";
             content = content.replace("$title", title);
             content = content.replace("$body", body);
 
@@ -99,9 +84,9 @@ public class WebServer {
             FileWriter fw = new FileWriter(personFile);
             fw.write(content);
             fw.close();
-            showPage(path,201);
+            showPage(path, 201);
         } else {
-            showPage(path,200);
+            showPage(path, 200);
         }
 
 
@@ -120,6 +105,7 @@ public class WebServer {
             s = new ServerSocket(3000);
         } catch (Exception e) {
             System.out.println("Error: " + e);
+            e.printStackTrace();
             return;
         }
 
@@ -127,7 +113,7 @@ public class WebServer {
         for (; ; ) {
             try {
                 // wait for a connection
-                Socket remote = s.accept();
+                remote = s.accept();
                 // remote is now the connected socket
                 System.out.println("Connection, sending data.");
                 BufferedReader in = new BufferedReader(new InputStreamReader(
@@ -140,15 +126,16 @@ public class WebServer {
                 // headers.
                 String str = ".";
                 List<String> httpRequest = new ArrayList<>();
-                while (str != null && !str.equals("")) {
+
+                do {
                     str = in.readLine();
                     httpRequest.add(str);
-                }
+                } while (str != null && !str.equals(""));
                 System.out.println(httpRequest);
 
                 switch (httpRequest.get(0).split(" ")[0]) {
                     case "GET":
-                        methodGET(httpRequest,remote);
+                        methodGET(httpRequest);
                         break;
 
                     case "POST":
@@ -158,22 +145,12 @@ public class WebServer {
                     case "DELETE":
                         break;
                     case "HEAD":
-                        returnHeader(200, "text/html",(long)0);
+                        returnHeader(200, "text/html");
                         break;
                     case "PUT":
                         break;
                 }
 
-
-//                // Send the response
-//                // Send the headers
-//                out.println("HTTP/1.0 200 OK");
-//                out.println("Content-Type: text/html");
-//                out.println("Server: Bot");
-//                // this blank line signals the end of the headers
-//                out.println("");
-//                // Send the HTML page
-//                out.println("<H1>Welcome to the Ultra Mini-WebServer</H1>");
                 out.flush();
                 remote.close();
             } catch (Exception e) {
@@ -192,18 +169,18 @@ public class WebServer {
         ws.start();
     }
 
-    protected void showPage(String page,Integer code) {
+    protected void showPage(String page, Integer code) {
 
         System.out.println(page);
 
-        File f = new File( page);
+        File f = new File(page);
         if (f.exists() && !f.isDirectory()) {
             // Send the response
             // Send the headers
-            returnHeader(code, "text/html",(long)0);
+            returnHeader(code, "text/html");
             // Send the HTML page
             try {
-                Scanner scanner = new Scanner(f,StandardCharsets.UTF_8);
+                Scanner scanner = new Scanner(f, StandardCharsets.UTF_8);
                 while (scanner.hasNextLine()) {
                     out.println(scanner.nextLine());
                 }
@@ -213,14 +190,12 @@ public class WebServer {
         }
     }
 
-    protected void returnHeader(Integer code, String type,Long Size) {
+    protected void returnHeader(Integer code, String type) {
         out.println("HTTP/1.0 " + code + " OK");
         out.println("Content-Type: " + type);
-        if(Objects.equals(type, "image/png")){
-//            out.println("Content-Length:"+Size);
-        }
         out.println("Server: Bot");
         // this blank line signals the end of the headers
         out.println("");
+        out.flush();
     }
 }
