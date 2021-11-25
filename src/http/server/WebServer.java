@@ -53,11 +53,15 @@ public class WebServer {
         switch (ressourceType) {
             case "html" -> ressourceType = "text/html";
             case "png" -> ressourceType = "image/png";
+            case "gif" -> ressourceType = "image/gif";
+            case "mp4" -> ressourceType = "video/mp4";
+
+            case "ico" -> ressourceType = "image/x-icon";
             case "mp3" -> ressourceType = "audio/mpeg";
             default -> ressourceType = "text/plain";
         }
         File file = new File(ressource);
-
+        System.out.println(file);
         if (file.isFile()) {
 
             returnHeader(200, ressourceType);
