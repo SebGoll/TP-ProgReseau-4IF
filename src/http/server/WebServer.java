@@ -31,8 +31,8 @@ public class WebServer {
         switch (ressourceType) {
             case "html" -> ressourceType = "text/html";
             case "png" -> ressourceType = "image/png";
-            case "mp3" -> ressourceType = "audio/mp3";
             case "ico" -> ressourceType = "image/x-icon";
+            case "mp3" -> ressourceType = "audio/mpeg";
             default -> ressourceType = "text/plain";
         }
         File file = new File(ressource);
