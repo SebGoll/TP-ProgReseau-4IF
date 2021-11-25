@@ -1,14 +1,28 @@
+/**
+ *MasterThread
+ * @author Louis Hasenfratz,Sebastien Goll
+ */
 package stream;
 
 import Data.SharedData;
 
+/**
+ * Rule over the client threads, detect when a message is received and tells the threads to display it to the users
+ */
 public class MasterThread extends Thread {
     public SharedData sd;
 
+    /**
+     * Constructor
+     * @param data the data of the chat
+     */
     public MasterThread(SharedData data) {
         this.sd = data;
     }
 
+    /**
+     * detect when a message is received and tells the threads to display it to the users
+     */
     public void run() {
         while (true) {
             try {
@@ -16,6 +30,7 @@ public class MasterThread extends Thread {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
+
             for (ClientThread clientThread : sd.threadList) {
                 Long chatId= clientThread.chatId;
                 if(chatId==null)continue;
@@ -30,6 +45,7 @@ public class MasterThread extends Thread {
 
                 }
             }
+            //remove a message when seen by everyone in the conversation
             for(Long chatId : sd.groupDataTable.keySet()){
                 if (sd.groupDataTable.get(chatId).messagesToSend.size() > 0 && sd.groupDataTable.get(chatId).counterRead == 0) {
                     sd.groupDataTable.get(chatId).messagesToSend.remove(0);

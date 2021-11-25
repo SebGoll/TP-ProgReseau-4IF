@@ -1,18 +1,18 @@
-/***
- * EchoServer
- * Example of a TCP server
- * Date: 10/01/04
- * Authors:
+/**
+ *EchoServerMultiThreaded
+ * @author Louis Hasenfratz,Sebastien Goll
  */
 
 package stream;
 
 import Data.GroupData;
 import Data.SharedData;
-
 import java.net.ServerSocket;
 import java.net.Socket;
 
+/**
+ * Main Class of the server, create all the datastructures used and accept connexions
+ */
 public class EchoServerMultiThreaded {
 
     /**
@@ -37,10 +37,9 @@ public class EchoServerMultiThreaded {
 
             System.out.println("Server ready...");
             while (true) {
-                //Nouvelle connexion
+                //New connexion
                 Socket clientSocket = listenSocket.accept();
                 System.out.println("Connexion from:" + clientSocket.getInetAddress());
-                System.out.println("ID: " + clientSocket.getRemoteSocketAddress());
                 ClientThread ct = new ClientThread(clientSocket, sd);
                 sd.threadList.add(ct);
                 sd.threadTable.put(clientSocket.getRemoteSocketAddress(), ct.getId());

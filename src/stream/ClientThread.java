@@ -1,8 +1,6 @@
-/***
- * ClientThread
- * Example of a TCP server
- * Date: 14/12/08
- * Authors:
+/**
+ *ClientThread
+ * @author Louis Hasenfratz,Sebastien Goll
  */
 
 package stream;
@@ -18,6 +16,9 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.AbstractMap;
 
+/**
+ * ClientThread is the thread that communicate with the user on the server-side
+ */
 public class ClientThread extends Thread {
 
     public boolean messageSent;
@@ -25,12 +26,16 @@ public class ClientThread extends Thread {
     public String name;
     public Long chatId;
 
-    private final Socket CLIENTSOCKET;
+    private final Socket CLIENT_SOCKET;
 
 
-
+    /**
+     * Constructor
+     * @param s the remote socket used by the user
+     * @param data the data of the chat
+     */
     ClientThread(Socket s, SharedData data) {
-        this.CLIENTSOCKET = s;
+        this.CLIENT_SOCKET = s;
         this.sd = data;
 
         this.name = null;
@@ -40,14 +45,14 @@ public class ClientThread extends Thread {
     }
 
     /**
-     * receives a request from client then sends an echo to the client
+     * Tell the system that a message from the user arrives and display message to the user
      **/
     public void run() {
         try {
             BufferedReader socIn = new BufferedReader(
-                    new InputStreamReader(CLIENTSOCKET.getInputStream()));
-            PrintStream socOut = new PrintStream(CLIENTSOCKET.getOutputStream());
-            //connexion d'un utilisateur
+                    new InputStreamReader(CLIENT_SOCKET.getInputStream()));
+            PrintStream socOut = new PrintStream(CLIENT_SOCKET.getOutputStream());
+            // user's login
             socOut.println("Renseignez votre pseudonyme");
             name = socIn.readLine();
             socOut.println("Renseignez votre id de conv");
@@ -67,8 +72,9 @@ public class ClientThread extends Thread {
             socOut.println("Bienvenue " + name + " vous pouvez maintenant chatter avec vos amis !\n");
             Persistence.logAndLoad(name, socOut, chatId);
 
-            //reception des messages et de l'utilisateur du thread et envoie des autres messages
+
             while (true) {
+                //reception of a message
                 if (socIn.ready()) {
                     String line = socIn.readLine();
                     sd.groupDataTable.get(chatId).messagesToSend.add(new AbstractMap.SimpleEntry<>(line, name));
@@ -77,6 +83,7 @@ public class ClientThread extends Thread {
                     LocalDateTime now = LocalDateTime.now();
                     Persistence.persist(dtf.format(now), line, this.name, chatId);
                 }
+                //a message need to be send
                 if (sd.groupDataTable.get(chatId).messageSent.get(this.getId())) {
                     DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM|HH:mm");
                     LocalDateTime now = LocalDateTime.now();

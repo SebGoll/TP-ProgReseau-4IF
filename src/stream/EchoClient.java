@@ -1,19 +1,20 @@
-/***
- * EchoClient
- * Example of a TCP client 
- * Date: 10/01/04
- * Authors:
+/**
+ *EchoClient
+ * @author Louis Hasenfratz,Sebastien Goll
  */
 package stream;
 
 import java.io.*;
 import java.net.*;
 
+/**
+ * EchoClient communicate with the chat server and is on the client side
+ */
 public class EchoClient {
 
     /**
      * main method
-     * accepts a connection, receives a message from client then sends an echo to the client
+     * accepts a connection, receives and sends messages to the client
      **/
     public static void main(String[] args) throws IOException {
 
@@ -28,8 +29,8 @@ public class EchoClient {
         }
 
         try {
-            // creation socket ==> connexion
-            echoSocket = new Socket(args[0], new Integer(args[1]).intValue());
+            // socket creation ==> connexion
+            echoSocket = new Socket(args[0], Integer.parseInt(args[1]));
             socIn = new BufferedReader(
                     new InputStreamReader(echoSocket.getInputStream()));
             socOut = new PrintStream(echoSocket.getOutputStream());
@@ -45,13 +46,14 @@ public class EchoClient {
 
         String line;
 
-        //receive message from the user and send it to the server
         while (true) {
+            //receive message from the user and send it to the server
             if (stdIn.ready()) {
                 line = stdIn.readLine();
                 if (line.equals(".")) break;
                 socOut.println(line);
             }
+            //receive a message from the server and display it to the user
             if (socIn.ready()) {
                 System.out.println(socIn.readLine());
             }
