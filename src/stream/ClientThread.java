@@ -1,8 +1,6 @@
-/***
- * ClientThread
- * Example of a TCP server
- * Date: 14/12/08
- * Authors:
+/**
+ *ClientThread
+ * @author Louis Hasenfratz,Sebastien Goll
  */
 
 package stream;
@@ -18,8 +16,10 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.AbstractMap;
 
-public class ClientThread
-        extends Thread {
+/**
+ * ClientThread is the thread that communicate with the user on the server-side
+ */
+public class ClientThread extends Thread {
 
     public boolean messageSent;
     public SharedData sd;
@@ -31,11 +31,17 @@ public class ClientThread
     private final String CHANGE_COMMAND = "\\changeto";
     private final String INFO_COMMAND = "\\infos";
     private final String HELP_COMMAND = "\\help";
-    private Socket clientSocket;
+
+    private final Socket CLIENT_SOCKET;
 
 
+    /**
+     * Constructor
+     * @param s the remote socket used by the user
+     * @param data the data of the chat
+     */
     ClientThread(Socket s, SharedData data) {
-        this.clientSocket = s;
+        this.CLIENT_SOCKET = s;
         this.sd = data;
 
         this.name = null;
@@ -45,14 +51,14 @@ public class ClientThread
     }
 
     /**
-     * receives a request from client then sends an echo to the client
+     * Tell the system that a message from the user arrives and display message to the user
      **/
     public void run() {
         try {
-            BufferedReader socIn = null;
-            socIn = new BufferedReader(
-                    new InputStreamReader(clientSocket.getInputStream()));
-            PrintStream socOut = new PrintStream(clientSocket.getOutputStream());
+            BufferedReader socIn = new BufferedReader(
+                    new InputStreamReader(CLIENT_SOCKET.getInputStream()));
+            PrintStream socOut = new PrintStream(CLIENT_SOCKET.getOutputStream());
+            // user's login
             socOut.println("Renseignez votre pseudonyme");
             name = socIn.readLine();
             socOut.println("Renseignez votre id de conv");
@@ -74,9 +80,9 @@ public class ClientThread
 
 
             while (true) {
+                //reception of a message
                 if (socIn.ready()) {
                     String line = socIn.readLine();
-
                     if (line.startsWith(CHANGE_COMMAND)) {
                         String[] chars= line.split(" ");
                         sd.groupDataTable.get(chatId).groupThreadList.remove(this);
@@ -118,6 +124,7 @@ public class ClientThread
                     }
 
                 }
+                //a message need to be send
                 if (sd.groupDataTable.get(chatId).messageSent.get(this.getId())) {
                     DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM|HH:mm");
                     LocalDateTime now = LocalDateTime.now();
