@@ -52,6 +52,10 @@ public class WebServer {
         System.out.println("Method GET : " + requestHeader.get(0));
         String[] temp = requestHeader.get(0).split(" ");
         String ressource = "ressources" + temp[1];
+        if(Objects.equals(temp[1], "/")){
+            ressource="ressources/index.html";
+
+        }
         String ressourceType = ressource.split("\\.")[1];
         displayRessource(ressource, ressourceType);
 
@@ -59,7 +63,7 @@ public class WebServer {
 
     private void methodDELETE(List<String> requestHeader) {
         String[] temp = requestHeader.get(0).split(" ");
-        String ressource = "pageHTML"+temp[1];
+        String ressource = "ressources"+temp[1];
         if(Objects.equals(temp[1], "/")){
             returnHeader(405,"text/plain");
             return;
