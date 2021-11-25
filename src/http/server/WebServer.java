@@ -25,7 +25,29 @@ public class WebServer {
     protected PrintWriter out;
     protected Socket remote;
 
+    protected void error404() throws IOException {
+        returnHeader(404,"text/html");
+        out.flush();
 
+
+
+        Files.copy(Path.of("ressources/error404.html"),remote.getOutputStream());
+
+    }
+
+    protected void error400() throws IOException {
+        returnHeader(400,"text/html");
+        out.flush();
+
+        Files.copy(Path.of("ressources/error400.html"),remote.getOutputStream());
+    }
+
+    protected void error405() throws IOException {
+        returnHeader(405,"text/html");
+        out.flush();
+
+        Files.copy(Path.of("ressources/error405.html"),remote.getOutputStream());
+    }
 
     protected void displayRessource(String ressource, String ressourceType) throws IOException {
         switch (ressourceType) {
@@ -43,7 +65,7 @@ public class WebServer {
             Files.copy(file.toPath(), remote.getOutputStream());
 
         } else {
-            System.out.println("Erreur 404");
+            error404();
         }
     }
 
@@ -214,10 +236,18 @@ public class WebServer {
     }
 
     protected void returnHeader(Integer code, String type) {
-        out.println("HTTP/1.0 " + code + " OK");
+        out.print("HTTP/1.0 ");
+        switch (code) {
+            case 200 -> out.println("200 OK");
+            case 201 -> out.println("201 Created");
+            case 400 -> out.println("400 Bad Request");
+            case 404 -> out.println("404 Not Found");
+            case 405 -> out.println("405 Method Not Allowed");
+        }
+
         out.println("Content-Type: " + type);
         out.println("Server: Bot");
-        // this blank line signals the end of the headers
+
         out.println("");
         out.flush();
     }
