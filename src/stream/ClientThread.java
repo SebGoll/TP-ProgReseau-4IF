@@ -89,12 +89,16 @@ public class ClientThread extends Thread {
                         sd.groupDataTable.get(chatId).groupThreadList.remove(this);
                         try {
                             Long newChatId = Long.parseLong(chars[1]);
-                            assert (sd.groupDataTable.containsKey(newChatId));
+                            if (!sd.groupDataTable.containsKey(newChatId)) {
+                                sd.groupDataTable.put(newChatId, new GroupData());
+                            }
                             this.chatId = newChatId;
 
                             sd.groupDataTable.get(chatId).groupThreadList.add(this);
                             sd.groupDataTable.get(chatId).messageSent.put(this.getId(), false);
-                            socOut.println("Vous etes maintenant sur la conversation " + chatId);
+                            socOut.println("Vous etes maintenant sur la conversation " + chatId+"\n");
+                            Persistence.logAndLoad(name, socOut, chatId);
+
                         } catch (Exception e) {
                             socOut.println("Mauvais id de conversation");
                             sd.groupDataTable.get(chatId).groupThreadList.add(this);
