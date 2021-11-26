@@ -35,15 +35,15 @@ Les codes retours HTTP **200,201,400,404,405** et **500** sont implémentés.
   
 [***PersistenceData***](PersistenceData) comporte les fichiers de persistance des conversations. Il y a un fichier par conversation. Si le fichier n'existe pas, la conversation n'est pas encore créée.
 
-***doc*** comporte les fichiers de la JavaDoc.
+[***doc***](doc) comporte les fichiers de la JavaDoc.
   
-***resources*** comporte les differentes ressources du serveurs, tel que les fichiers html et les médias affichés.
+[***resources***](resources) comporte les differentes ressources du serveurs, tel que les fichiers html et les médias affichés.
     
-***src/http/server/WebServer.java*** est le serveur Web.  
+[***src/http/server/WebServer.java***](src/http/server/WebServer.java) est le serveur Web.  
 
-***src/Data*** comporte les fichiers qui gèrent le partage de données entre les chats. 
+[***src/Data***](src/Data) comporte les fichiers qui gèrent le partage de données entre les chats. 
 
-***src/stream*** comporte les fichiers des chats. 
+[***src/stream***](src/stream) comporte les fichiers des chats. 
 
 
   
