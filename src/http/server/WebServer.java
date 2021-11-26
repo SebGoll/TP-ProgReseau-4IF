@@ -341,7 +341,7 @@ public class WebServer {
         returnHeader(404, "text/html");
         out.flush();
 
-
+        System.out.println("Error 404");
         Files.copy(Path.of("resources/error404.html"), remote.getOutputStream());
 
     }
@@ -354,16 +354,18 @@ public class WebServer {
     protected void error400() throws IOException {
         returnHeader(400, "text/html");
         out.flush();
-
+        System.out.println("Error 400");
         Files.copy(Path.of("resources/error400.html"), remote.getOutputStream());
     }
 
     /**
      * Give a error 405
      */
-    protected void error405() {
+    protected void error405() throws IOException {
         returnHeader(405, "text/html");
         out.flush();
+        System.out.println("Error 405");
+        Files.copy(Path.of("resources/error405.html"), remote.getOutputStream());
     }
 
     /**
@@ -372,7 +374,7 @@ public class WebServer {
     protected void error500() {
         returnHeader(500, "text/html");
         out.flush();
-
+        System.out.println("Error 500");
         try {
             Files.copy(Path.of("resources/error500.html"), remote.getOutputStream());
         } catch (Exception e) {
