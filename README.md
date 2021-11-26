@@ -33,7 +33,7 @@ Les codes retours HTTP **200,201,400,404,405** et **500** sont implémentés.
   
 ## Description de l'arborescence
   
-***PersistenceData*** comporte les fichiers de persistance des conversations. Il y a un fichier par conversation. Si le fichier n'existe pas, la conversation n'est pas encore créée.
+[***PersistenceData***](PersistenceData) comporte les fichiers de persistance des conversations. Il y a un fichier par conversation. Si le fichier n'existe pas, la conversation n'est pas encore créée.
 
 ***doc*** comporte les fichiers de la JavaDoc.
   
