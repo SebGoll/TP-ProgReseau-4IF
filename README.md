@@ -16,11 +16,11 @@ Il peut maintenant communiquer avec les autres personnes connectées ou encore l
 
 **\infos :** donne l'id de conversation et les utilisateurs connectés.
 
-**\changeto <idConv> :** redirige l'utilisateur sur la conversation indiquée. 
+**\changeto \<idConv\> :** redirige l'utilisateur sur la conversation indiquée. 
   
 **\tableFlip :** peut être inséré dans un message pour être remplacé par : "(╯‵□′)╯︵┻━┻".
   
-**@<NomPersonne> :** peut être inséré dans un message pour mentionner une personne. La personne mentionnée verra ce message en surbrillance. 
+**@\<NomPersonne\> :** peut être inséré dans un message pour mentionner une personne. La personne mentionnée verra ce message en surbrillance. 
 
 ## Web Server 
   
